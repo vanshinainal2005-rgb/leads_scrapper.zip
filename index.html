@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Scraper Pro</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 1rem;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .progress-bar-bg {
+            background-color: var(--border);
+            border-radius: 99px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--primary);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 99px;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .download-btn {
+            display: none;
+            background-color: var(--success);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .download-btn:hover {
+            background-color: #059669;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Lead Scraper Pro</h1>
+        <p class="subtitle">Extract business leads in seconds</p>
+
+        <form id="scrapeForm">
+            <div class="form-group">
+                <label for="keyword">Keyword or Business Type</label>
+                <input type="text" id="keyword" name="keyword" placeholder="e.g. Digital Marketing, SEO, Web Design"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="city">City and State</label>
+                <input type="text" id="city" name="city" placeholder="e.g. New York, NY" required>
+            </div>
+
+            <div class="form-group">
+                <label for="pages">Pages to Scrape</label>
+                <input type="number" id="pages" name="pages" value="1" min="1" max="100" required>
+            </div>
+
+            <button type="submit" id="submitBtn">Start Scraping</button>
+        </form>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="statusMessage">Starting...</span>
+                <span id="percentageText">0%</span>
+            </div>
+        </div>
+
+        <a href="/download" class="download-btn" id="downloadBtn">📥 Download CSV</a>
+
+        <div class="footer">
+            Developed By Arbaj Raza <h5> <a href="https://www.linkedin.com/in/arbaj-raza-99012a258/" /> Follow On
+                Linkdin</a>
+            </h5>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('scrapeForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBarFill = document.getElementById('progressBarFill');
+        const statusMessage = document.getElementById('statusMessage');
+        const percentageText = document.getElementById('percentageText');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Reset UI
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Scraping in progress...';
+            progressContainer.style.display = 'block';
+            downloadBtn.style.display = 'none';
+            progressBarFill.style.width = '0%';
+            percentageText.innerText = '0%';
+            statusMessage.innerText = 'Initializing...';
+
+            const formData = new FormData(form);
+
+            try {
+                // Start scrape via POST
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    // Start polling
+                    pollProgress();
+                } else if (result.message && result.message.includes("already running")) {
+                    if (confirm("Scraper is reportedly running. Stop and restart?")) {
+                        await fetch('/reset', { method: 'POST' });
+                        alert("Scraper reset. Please click Start again.");
+                        resetUI();
+                    } else {
+                        resetUI();
+                    }
+                } else {
+                    alert("Error starting scraper: " + result.message);
+                    resetUI();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert("An error occurred. check console.");
+                resetUI();
+            }
+        });
+
+        function pollProgress() {
+            const intervalId = setInterval(async () => {
+                try {
+                    const res = await fetch('/progress');
+                    const data = await res.json();
+
+                    // Update UI
+                    const progress = data.progress || 0;
+                    progressBarFill.style.width = progress + '%';
+                    percentageText.innerText = progress + '%';
+                    statusMessage.innerText = data.message || 'Processing...';
+
+                    if (data.done) {
+                        clearInterval(intervalId);
+                        submitBtn.innerText = 'Scrape Complete';
+                        submitBtn.disabled = false; // Re-enable for new scrapes?
+                        submitBtn.innerText = 'Start New Scrape';
+                        downloadBtn.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error("Polling error:", error);
+                }
+            }, 1000); // Check every 1 second
+        }
+
+        function resetUI() {
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Start Scraping';
+            progressContainer.style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
